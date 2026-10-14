@@ -32,8 +32,7 @@ class GestorIncidencias {
   }
 
   int contar(String estado) {
-    if (estado == 'Pendiente') return cantidadPendientes;
-    return incidencias.where((x) => x.estado == estado).length;
+  return incidencias.where((x) => x.estado == estado).length;
   }
 
   Future<void> cambiarEstado(String id, String estado) async {
