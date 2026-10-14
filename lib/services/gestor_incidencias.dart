@@ -13,7 +13,7 @@ class GestorIncidencias {
   }
 
   
-List<Incidencia> buscar(String texto) {
+  List<Incidencia> buscar(String texto) {
   final consulta = texto.trim().toLowerCase();
 
   if (consulta.isEmpty) return incidencias;
@@ -22,7 +22,7 @@ List<Incidencia> buscar(String texto) {
     return x.titulo.toLowerCase().contains(consulta) ||
         x.descripcion.toLowerCase().contains(consulta);
   }).toList();
-}
+  }
 
   Incidencia? porId(String id) {
     for (var x in incidencias) {
