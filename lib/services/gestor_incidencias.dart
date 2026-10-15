@@ -45,14 +45,28 @@ class GestorIncidencias {
     await datos.guardar(incidencias);
   }
 
+  Future<void> cambiarPrioridad(String id, String prioridad) async {
+    final item = porId(id);
+    if (item == null) throw StateError('Incidencia no encontrada');
+    final anterior = item.prioridad;
+    item.prioridad = prioridad;
+    try {
+      await datos.guardar(incidencias);
+    } catch (_) {
+      item.prioridad = anterior;
+      rethrow;
+    }
+  }
+
   Future<void> crear(String titulo, String descripcion, String cliente,
-      String categoria) async {
+      String categoria, {String prioridad = 'Media'}) async {
     final nuevo = Incidencia(
       id: 'INC-${DateTime.now().microsecondsSinceEpoch}',
       titulo: titulo,
       descripcion: descripcion,
       cliente: cliente,
       categoria: categoria,
+      prioridad: prioridad,
       estado: 'Pendiente',
       fecha: DateTime.now().toIso8601String().split('T').first,
     );
