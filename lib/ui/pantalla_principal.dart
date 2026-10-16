@@ -16,6 +16,24 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
   bool cargando = true;
   String? error;
   String busqueda = '';
+  final controladorBusqueda = TextEditingController();
+  String? filtroEstado;
+  String? filtroPrioridad;
+
+  @override
+  void dispose() {
+    controladorBusqueda.dispose();
+    super.dispose();
+  }
+
+  void limpiarFiltros() {
+    controladorBusqueda.clear();
+    setState(() {
+      busqueda = '';
+      filtroEstado = null;
+      filtroPrioridad = null;
+    });
+  }
 
   @override
   void initState() {
@@ -51,8 +69,11 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
             children: [
               Icon(icono, size: 19, color: const Color(0xFF174C83)),
               const SizedBox(height: 4),
-              Text(valor, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-              Text(etiqueta, textAlign: TextAlign.center,
+              Text(valor,
+                  style: const TextStyle(
+                      fontSize: 24, fontWeight: FontWeight.bold)),
+              Text(etiqueta,
+                  textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 12)),
             ],
           ),
@@ -64,7 +85,8 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
   Future<void> abrirDetalle(Incidencia item) async {
     await Navigator.push<void>(
       context,
-      MaterialPageRoute(builder: (_) => PantallaDetalle(gestor: g, id: item.id)),
+      MaterialPageRoute(
+          builder: (_) => PantallaDetalle(gestor: g, id: item.id)),
     );
     if (mounted) setState(() {});
   }
@@ -84,7 +106,8 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
 
   @override
   Widget build(BuildContext context) {
-    final items = g.buscar(busqueda);
+    final items =
+        g.buscar(busqueda, estado: filtroEstado, prioridad: filtroPrioridad);
     return Scaffold(
       appBar: AppBar(
         title: const Text('NexaSoft | Incidencias'),
@@ -96,10 +119,15 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
                 context: context,
                 builder: (ctx) => AlertDialog(
                   title: const Text('Restablecer demostración'),
-                  content: const Text('Se descartarán los cambios locales y se cargarán las incidencias iniciales.'),
+                  content: const Text(
+                      'Se descartarán los cambios locales y se cargarán las incidencias iniciales.'),
                   actions: [
-                    TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
-                    FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Restablecer')),
+                    TextButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        child: const Text('Cancelar')),
+                    FilledButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        child: const Text('Restablecer')),
                   ],
                 ),
               );
@@ -109,7 +137,8 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
                 if (mounted) setState(() {});
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al reiniciar: $e')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error al reiniciar: $e')));
                 }
               }
             },
@@ -127,12 +156,14 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
       body: cargando
           ? const Center(child: CircularProgressIndicator())
           : error != null
-              ? Center(child: Padding(
+              ? Center(
+                  child: Padding(
                   padding: const EdgeInsets.all(24),
                   child: Column(mainAxisSize: MainAxisSize.min, children: [
                     Text(error!, textAlign: TextAlign.center),
                     const SizedBox(height: 12),
-                    FilledButton(onPressed: cargar, child: const Text('Reintentar')),
+                    FilledButton(
+                        onPressed: cargar, child: const Text('Reintentar')),
                   ]),
                 ))
               : Center(
@@ -143,58 +174,146 @@ class _PantallaPrincipalState extends State<PantallaPrincipal> {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(12, 14, 12, 8),
                           child: Row(children: [
-                            resumen('Pendientes', '${g.contar('Pendiente')}', Icons.pending_actions),
-                            resumen('En proceso', '${g.contar('En proceso')}', Icons.build_outlined),
-                            resumen('Resueltas', '${g.contar('Resuelta')}', Icons.check_circle_outline),
+                            resumen('Pendientes', '${g.contar('Pendiente')}',
+                                Icons.pending_actions),
+                            resumen('En proceso', '${g.contar('En proceso')}',
+                                Icons.build_outlined),
+                            resumen('Resueltas', '${g.contar('Resuelta')}',
+                                Icons.check_circle_outline),
                           ]),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 5),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 17, vertical: 5),
                           child: TextField(
+                            controller: controladorBusqueda,
                             decoration: const InputDecoration(
                               labelText: 'Buscar incidencias',
                               hintText: 'Ejemplo: WiFi, correo, pantalla',
                               prefixIcon: Icon(Icons.search),
                               border: OutlineInputBorder(),
                             ),
-                            onChanged: (texto) => setState(() => busqueda = texto),
+                            onChanged: (texto) =>
+                                setState(() => busqueda = texto),
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 17, vertical: 5),
+                          child: Wrap(
+                            spacing: 12,
+                            runSpacing: 8,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: 190,
+                                child: DropdownButtonFormField<String>(
+                                  key: ValueKey('estado-$filtroEstado'),
+                                  initialValue: filtroEstado,
+                                  isExpanded: true,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Estado',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  items: const [
+                                    DropdownMenuItem(
+                                        value: null, child: Text('Todos')),
+                                    DropdownMenuItem(
+                                        value: 'Pendiente',
+                                        child: Text('Pendiente')),
+                                    DropdownMenuItem(
+                                        value: 'En proceso',
+                                        child: Text('En proceso')),
+                                    DropdownMenuItem(
+                                        value: 'Resuelta',
+                                        child: Text('Resuelta')),
+                                  ],
+                                  onChanged: (valor) =>
+                                      setState(() => filtroEstado = valor),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 190,
+                                child: DropdownButtonFormField<String>(
+                                  key: ValueKey('prioridad-$filtroPrioridad'),
+                                  initialValue: filtroPrioridad,
+                                  isExpanded: true,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Prioridad',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  items: [
+                                    const DropdownMenuItem(
+                                        value: null, child: Text('Todas')),
+                                    for (final prioridad
+                                        in Incidencia.prioridades)
+                                      DropdownMenuItem(
+                                          value: prioridad,
+                                          child: Text(prioridad)),
+                                  ],
+                                  onChanged: (valor) =>
+                                      setState(() => filtroPrioridad = valor),
+                                ),
+                              ),
+                              TextButton.icon(
+                                onPressed: limpiarFiltros,
+                                icon: const Icon(Icons.filter_alt_off),
+                                label: const Text('Limpiar filtros'),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 4),
                           child: Align(
                             alignment: Alignment.centerLeft,
-                            child: Text('${items.length} registros', style: const TextStyle(color: Colors.black54)),
+                            child: Text('${items.length} registros',
+                                style: const TextStyle(color: Colors.black54)),
                           ),
                         ),
                         Expanded(
                           child: items.isEmpty
-                              ? const Center(child: Text('No se encontraron incidencias'))
+                              ? const Center(
+                                  child: Text('No se encontraron incidencias'))
                               : ListView.builder(
-                                  padding: const EdgeInsets.only(left: 12, right: 12, bottom: 100),
+                                  padding: const EdgeInsets.only(
+                                      left: 12, right: 12, bottom: 100),
                                   itemCount: items.length,
                                   itemBuilder: (context, i) {
                                     final item = items[i];
                                     return Card(
                                       margin: const EdgeInsets.only(bottom: 10),
                                       child: ListTile(
-                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                        title: Text(item.titulo, style: const TextStyle(fontWeight: FontWeight.w600)),
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                                horizontal: 16, vertical: 8),
+                                        title: Text(item.titulo,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.w600)),
                                         subtitle: Padding(
-                                          padding: const EdgeInsets.only(top: 8),
+                                          padding:
+                                              const EdgeInsets.only(top: 8),
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
-                                              Text('${item.id}  ·  ${item.cliente}'),
-                                              Text('Prioridad: ${item.prioridad}'),
+                                              Text(
+                                                  '${item.id}  ·  ${item.cliente}'),
+                                              Text(
+                                                  'Prioridad: ${item.prioridad}'),
                                               const SizedBox(height: 6),
-                                              Text(item.estado, style: TextStyle(
-                                                color: colorEstado(item.estado), fontWeight: FontWeight.bold,
-                                              )),
+                                              Text(item.estado,
+                                                  style: TextStyle(
+                                                    color: colorEstado(
+                                                        item.estado),
+                                                    fontWeight: FontWeight.bold,
+                                                  )),
                                             ],
                                           ),
                                         ),
-                                        trailing: const Icon(Icons.chevron_right),
+                                        trailing:
+                                            const Icon(Icons.chevron_right),
                                         onTap: () => abrirDetalle(item),
                                       ),
                                     );

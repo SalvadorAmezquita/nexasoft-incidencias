@@ -12,16 +12,17 @@ class GestorIncidencias {
         incidencias.where((x) => x.estado == 'Pendiente').length;
   }
 
-  
-  List<Incidencia> buscar(String texto) {
-  final consulta = texto.trim().toLowerCase();
+  List<Incidencia> buscar(String texto, {String? estado, String? prioridad}) {
+    final consulta = texto.trim().toLowerCase();
 
-  if (consulta.isEmpty) return incidencias;
-
-  return incidencias.where((x) {
-    return x.titulo.toLowerCase().contains(consulta) ||
-        x.descripcion.toLowerCase().contains(consulta);
-  }).toList();
+    return incidencias.where((x) {
+      final coincideTexto = consulta.isEmpty ||
+          x.titulo.toLowerCase().contains(consulta) ||
+          x.descripcion.toLowerCase().contains(consulta);
+      return coincideTexto &&
+          (estado == null || x.estado == estado) &&
+          (prioridad == null || x.prioridad == prioridad);
+    }).toList();
   }
 
   Incidencia? porId(String id) {
@@ -32,7 +33,7 @@ class GestorIncidencias {
   }
 
   int contar(String estado) {
-  return incidencias.where((x) => x.estado == estado).length;
+    return incidencias.where((x) => x.estado == estado).length;
   }
 
   Future<void> cambiarEstado(String id, String estado) async {
@@ -58,8 +59,9 @@ class GestorIncidencias {
     }
   }
 
-  Future<void> crear(String titulo, String descripcion, String cliente,
-      String categoria, {String prioridad = 'Media'}) async {
+  Future<void> crear(
+      String titulo, String descripcion, String cliente, String categoria,
+      {String prioridad = 'Media'}) async {
     final nuevo = Incidencia(
       id: 'INC-${DateTime.now().microsecondsSinceEpoch}',
       titulo: titulo,
