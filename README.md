@@ -1,36 +1,57 @@
-# NexaSoft - Mesa de incidencias (versión recibida)
+﻿# NexaSoft — Mesa de incidencias
 
-Aplicación de entrenamiento para mantenimiento de un producto heredado. Los datos son **ficticios**. Esta versión debe arrancar y mostrar incidencias; hay comportamientos defectuosos reportados por el cliente y peticiones de cambio pendientes. NO es un producto de operación real.
+Aplicación de práctica desarrollada con Flutter y Dart para registrar y consultar incidencias técnicas. Incluye correcciones de persistencia, búsqueda y contadores, además de prioridades y filtros combinados. Los datos de demostración son ficticios.
 
-## Primera instalación
+## Funciones
 
-Prerequisito: Flutter instalado y al menos un dispositivo habilitado. El repositorio incluye el código fuente, los recursos y la configuración de dependencias; las carpetas nativas se generan con el SDK de Flutter instalado en cada equipo.
+- Registro, listado y detalle de incidencias.
+- Cambio de estado con guardado local y contadores actualizados.
+- Búsqueda en título y descripción, sin distinguir mayúsculas y omitiendo espacios externos.
+- Prioridades Baja, Media y Alta; los registros antiguos sin una prioridad válida utilizan Media.
+- Filtros combinables por texto, estado y prioridad, con opción para limpiarlos.
+- Restauración de los datos de demostración.
 
-En la carpeta del proyecto:
+## Ejecutar
+
+Se necesita Flutter instalado y un dispositivo o navegador compatible. Desde la raíz del proyecto:
+
+```bash
+flutter pub get
+flutter run -d chrome --web-port 8080
+```
+
+Para Android, conectar un dispositivo con depuración USB, consultar `flutter devices` y ejecutar `flutter run -d <id>`. Para Windows, utilizar `flutter run -d windows` con las herramientas de compilación instaladas.
+
+Si faltan archivos nativos generados por Flutter, ejecutar desde esta misma carpeta:
 
 ```bash
 flutter create . --project-name nexasoft_incidencias --platforms android,web,windows
 flutter pub get
-flutter run -d chrome
 ```
 
-Para Android: conectar un teléfono con depuración USB y usar `flutter devices` y `flutter run -d <id>`; para Windows: `flutter run -d windows` (si el equipo cuenta con herramientas de escritorio).
+También están disponibles los scripts `preparar.ps1` y `preparar.sh`. No sustituir los archivos de `lib/` ni `assets/` al preparar el entorno.
 
-**No usar** `flutter create` en una carpeta distinta ni sustituir los archivos `lib/` o `assets/`. El comando genera las carpetas nativas que faltan.
+## Pruebas
 
-Scripts alternativos: `preparar.ps1` (Windows PowerShell) o `preparar.sh` (Linux/macOS); ejecutan la misma configuración.
+```bash
+flutter test
+flutter analyze
+```
 
-## Características visibles
+El proyecto incluye 11 pruebas de compatibilidad del modelo, lógica de filtros e interacción de pantalla. En la revisión del 16 de octubre de 2026 las 11 aprobaron. El analizador reportó tres avisos informativos pendientes: dos usos obsoletos de `value` en formularios y un uso de `BuildContext` después de una operación asíncrona.
 
-- Lista y detalle de incidencias, búsqueda y contador por estado.
-- Registro de incidencias en el almacenamiento local del dispositivo.
-- Cambio de estado desde la pantalla de detalle.
-- Botón de reinicio de datos de demostración (ícono de flecha circular en la barra superior).
+## Estructura
 
-La app usa un JSON de ejemplo como datos iniciales; después almacena los registros localmente. **Cambiar el JSON incluido no equivale a actualizar registros ya creados en el almacenamiento del dispositivo.** La opción Restablecer demostración elimina los cambios locales y restaura la semilla; usarla solo cuando se requiera reiniciar pruebas.
+- `lib/`: modelo, almacenamiento local, gestor y pantallas.
+- `assets/`: datos iniciales ficticios.
+- `test/`: pruebas automáticas.
+- `android/`, `web/` y `windows/`: configuración de las plataformas.
+- `pubspec.yaml` y `pubspec.lock`: dependencias del proyecto.
 
-## Trabajo
+## Datos locales
 
-Los tickets, requisitos de aceptación, bitácora individual y protocolo de uso de IA están en el documento de práctica distribuido por el profesor.
+El JSON de `assets/` se usa como semilla; los cambios posteriores se guardan localmente. Modificar la semilla no actualiza registros ya guardados. En Chrome, mantener el mismo origen y perfil para comprobar la persistencia.
 
-No copiar el código a asistentes públicos sin permiso. Los datos actuales son ficticios, pero se simulan los controles de confidencialidad de una empresa real.
+La opción **Restablecer demostración** elimina los cambios locales y restaura los datos iniciales.
+
+Las bitácoras y los documentos de entrega se administran por separado y no forman parte de los archivos de esta versión del repositorio.

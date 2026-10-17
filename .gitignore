@@ -11,3 +11,7 @@ build/
 .vscode/
 android/local.properties
 android/key.properties
+
+# Documentos de la practica y archivos de entrega locales
+/Leer/
+/Entrega/
